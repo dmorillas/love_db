@@ -1,0 +1,4 @@
+enum SearchMode {
+  bruteForce,
+  hnsw,
+}

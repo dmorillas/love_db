@@ -1,0 +1,4 @@
+enum Metric {
+  euclidean,
+  cosine,
+}
