@@ -1,7 +1,17 @@
 name: love_db
-description: "Local Vector DB"
-version: 0.0.1
-homepage:
+description: "Local vector database for Flutter apps with on-device SQLite storage, HNSW ANN search, and a simple collections API for managing and querying embeddings."
+version: 1.0.0
+homepage: https://github.com/dmorillas/love_db
+repository: https://github.com/dmorillas/love_db
+issue_tracker: https://github.com/dmorillas/love_db/issues
+documentation: https://github.com/dmorillas/love_db
+
+topics:
+  - database
+  - vector-database
+  - embeddings
+  - similarity-search
+  - flutter
 
 environment:
   sdk: ^3.7.2
@@ -21,6 +31,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   sqflite_common_ffi: ^2.3.4
+  path_provider_platform_interface: ^2.1.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

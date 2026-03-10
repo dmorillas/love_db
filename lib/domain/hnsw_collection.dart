@@ -58,7 +58,7 @@ class HnswCollection extends Collection {
   @override
   Future<List<Document>> find({required List<double> vector, int limit = 10}) async {
     if (vector.length != dimension) {
-      throw ArgumentError('Query vector length (${vector.length}) must equal collection dimension (${dimension}).');
+      throw ArgumentError('Query vector length (${vector.length}) must equal collection dimension ($dimension).');
     }
     final items = _hnswIndex.search(vector, limit).items;
     final ids = items.map((e) => e.item).toList();

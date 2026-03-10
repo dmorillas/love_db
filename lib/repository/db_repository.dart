@@ -34,8 +34,8 @@ class DbRepository implements Repository {
     final path = join(documentsDirectory.path, "$name.db");
 
     _name = name;
-    _documentsTableName = "love_db_${name}_documents";
-    _vectorsTableName = "love_db_${name}_vectors";
+    _documentsTableName = "love_db_${_name}_documents";
+    _vectorsTableName = "love_db_${_name}_vectors";
 
     _database = await openDatabase(path, version: 1,
       onCreate: (db, version) async {
