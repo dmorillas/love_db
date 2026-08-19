@@ -98,4 +98,78 @@ void main() {
     expect(res.first.text, 'x');
     await c.dispose();
   });
+
+  Future<void> _upsertInsertFlow({required SearchMode mode, required Metric metric}) async {
+    final love = LoVeDB(dimension: 4, metric: metric, mode: mode);
+    final c = await love.collection('upsert_insert');
+
+    final id = nanoid();
+    await c.upsert(id: id, text: 'original', vector: [1, 0, 0, 0]);
+
+    final results = await c.find(vector: [1, 0, 0, 0], limit: 1);
+    expect(results.length, 1);
+    expect(results.first.text, 'original');
+    expect(results.first.id, id);
+
+    await c.dispose();
+  }
+
+  test('bruteForce + cosine upsert inserts new document', () async {
+    await _upsertInsertFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
+  });
+
+  test('hnsw + cosine upsert inserts new document', () async {
+    await _upsertInsertFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
+  });
+
+  Future<void> _upsertUpdateFlow({required SearchMode mode, required Metric metric}) async {
+    final love = LoVeDB(dimension: 4, metric: metric, mode: mode);
+    final c = await love.collection('upsert_update');
+
+    final id = nanoid();
+    await c.insert(id: id, text: 'before', vector: [1, 0, 0, 0]);
+
+    await c.upsert(id: id, text: 'after', vector: [0, 1, 0, 0], metadata: {"key": "value"});
+
+    final doc = await c.get(id: id);
+    expect(doc, isNotNull);
+    expect(doc!.text, 'after');
+    expect(doc.metadata['key'], 'value');
+
+    final count = await c.count();
+    expect(count, 1);
+
+    await c.dispose();
+  }
+
+  test('bruteForce + cosine upsert updates existing document', () async {
+    await _upsertUpdateFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
+  });
+
+  test('hnsw + cosine upsert updates existing document', () async {
+    await _upsertUpdateFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
+  });
+
+  test('hnsw + euclidean upsert updates HNSW index correctly', () async {
+    final love = LoVeDB(dimension: 4, metric: Metric.euclidean, mode: SearchMode.hnsw);
+    final c = await love.collection('upsert_hnsw_index');
+
+    final id = nanoid();
+    await c.insert(id: id, text: 'far', vector: [0, 1, 0, 0]);
+    await c.insert(id: nanoid(), text: 'close', vector: [0.9, 0, 0, 0]);
+
+    var results = await c.find(vector: [1, 0, 0, 0], limit: 2);
+    expect(results.first.text, 'close');
+
+    await c.upsert(id: id, text: 'updated_close', vector: [0.95, 0, 0, 0]);
+
+    results = await c.find(vector: [1, 0, 0, 0], limit: 2);
+    expect(results.first.text, 'updated_close');
+    expect(results.first.id, id);
+
+    final count = await c.count();
+    expect(count, 2);
+
+    await c.dispose();
+  });
 }

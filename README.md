@@ -62,7 +62,20 @@ await myCollection.insert(
 );
 ```
 
-### **4\. Search for Documents**
+### **4\. Upsert Documents**
+
+Insert a new document or update an existing one if the ID already exists.
+
+```dart
+await myCollection.upsert(
+  id: id,
+  vector: vector,
+  text: "This will be inserted or updated.",
+  metadata: metadata,
+);
+```
+
+### **5\. Search for Documents**
 
 Search for the most similar documents by providing a query vector.
 
@@ -78,7 +91,7 @@ for (final doc in results) {
 }
 ```
 
-### **5\. Delete Documents**
+### **6\. Delete Documents**
 
 You can delete a document by its ID.
 
@@ -86,7 +99,7 @@ You can delete a document by its ID.
 await myCollection.delete(id: "document-id-123");
 ```
 
-### **6\. Clean Up**
+### **7\. Clean Up**
 
 It's important to dispose of the collection to close the underlying database connection.
 

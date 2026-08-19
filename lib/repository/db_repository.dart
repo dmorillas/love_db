@@ -73,6 +73,21 @@ class DbRepository implements Repository {
   }
 
   @override
+  Future<void> upsert({required String id, required Uint8List vector, required String text, Map<String, dynamic>? metadata}) async {
+    await _database.transaction((txn) async {
+      await txn.insert(_documentsTableName, {
+        "id": id,
+        "text": text,
+        "metadata": jsonEncode(metadata ?? <String, dynamic>{}),
+        "created_at": DateTime.now().millisecondsSinceEpoch
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+      await txn.insert(_vectorsTableName, {"id": id, "vector": vector},
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    });
+  }
+
+  @override
   Future<List<Vector>> getVectors() async {
     final result = await _database.query(_vectorsTableName);
 

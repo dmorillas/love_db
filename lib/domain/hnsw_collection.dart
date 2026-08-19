@@ -50,6 +50,13 @@ class HnswCollection extends Collection {
   }
 
   @override
+  Future<void> upsert({required String id, required List<double> vector, required String text, Map<String, dynamic>? metadata}) async {
+    await super.upsert(id: id, vector: vector, text: text, metadata: metadata);
+    _hnswIndex.delete(id);
+    _hnswIndex.add(LocalHnswItem<String>(item: id, vector: vector));
+  }
+
+  @override
   Future<void> delete({required String id}) async {
     await super.delete(id: id);
     _hnswIndex.delete(id);

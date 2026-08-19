@@ -35,6 +35,13 @@ abstract class Collection {
     await repository.insert(id: id, vector: VectorUtils.vectorToBytes(vector), text: text, metadata: metadata);
   }
 
+  Future<void> upsert({required String id, required List<double> vector, required String text, Map<String, dynamic>? metadata}) async {
+    if (vector.length != dimension) {
+      throw ArgumentError('Vector length (${vector.length}) must equal collection dimension ($dimension).');
+    }
+    await repository.upsert(id: id, vector: VectorUtils.vectorToBytes(vector), text: text, metadata: metadata);
+  }
+
   Future<int> count() async {
     return await repository.count();
   }
