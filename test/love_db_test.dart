@@ -41,7 +41,7 @@ void main() {
     }
   });
 
-  Future<void> _basicCrudFlow({required SearchMode mode, required Metric metric}) async {
+  Future<void> basicCrudFlow({required SearchMode mode, required Metric metric}) async {
     final love = LoVeDB(dimension: 4, metric: metric, mode: mode);
     final c = await love.collection('col');
 
@@ -62,11 +62,11 @@ void main() {
   }
 
   test('bruteForce + cosine basic CRUD and search order', () async {
-    await _basicCrudFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
+    await basicCrudFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
   });
 
   test('bruteForce + euclidean basic CRUD and search order', () async {
-    await _basicCrudFlow(mode: SearchMode.bruteForce, metric: Metric.euclidean);
+    await basicCrudFlow(mode: SearchMode.bruteForce, metric: Metric.euclidean);
   });
 
   test('hnsw + cosine basic CRUD and search order + rebuild on open', () async {
@@ -99,7 +99,7 @@ void main() {
     await c.dispose();
   });
 
-  Future<void> _upsertInsertFlow({required SearchMode mode, required Metric metric}) async {
+  Future<void> upsertInsertFlow({required SearchMode mode, required Metric metric}) async {
     final love = LoVeDB(dimension: 4, metric: metric, mode: mode);
     final c = await love.collection('upsert_insert');
 
@@ -115,14 +115,14 @@ void main() {
   }
 
   test('bruteForce + cosine upsert inserts new document', () async {
-    await _upsertInsertFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
+    await upsertInsertFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
   });
 
   test('hnsw + cosine upsert inserts new document', () async {
-    await _upsertInsertFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
+    await upsertInsertFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
   });
 
-  Future<void> _upsertUpdateFlow({required SearchMode mode, required Metric metric}) async {
+  Future<void> upsertUpdateFlow({required SearchMode mode, required Metric metric}) async {
     final love = LoVeDB(dimension: 4, metric: metric, mode: mode);
     final c = await love.collection('upsert_update');
 
@@ -143,11 +143,11 @@ void main() {
   }
 
   test('bruteForce + cosine upsert updates existing document', () async {
-    await _upsertUpdateFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
+    await upsertUpdateFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
   });
 
   test('hnsw + cosine upsert updates existing document', () async {
-    await _upsertUpdateFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
+    await upsertUpdateFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
   });
 
   test('hnsw + euclidean upsert updates HNSW index correctly', () async {

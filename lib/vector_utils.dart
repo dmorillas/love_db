@@ -14,7 +14,9 @@ class VectorUtils {
   static List<double> bytesToVector(Uint8List bytes, int dim) {
     final bd = ByteData.sublistView(bytes);
     final out = List<double>.filled(dim, 0.0);
-    for (int i = 0; i < dim; i++) out[i] = bd.getFloat32(i * 4, Endian.little);
+    for (int i = 0; i < dim; i++) {
+      out[i] = bd.getFloat32(i * 4, Endian.little);
+    }
     return out;
   }
 }

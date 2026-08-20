@@ -3,15 +3,16 @@ import 'dart:math';
 import 'package:love_db/model/document.dart';
 import 'package:love_db/domain/collection.dart';
 import 'package:love_db/model/metric.dart';
+import 'package:love_db/repository/repository.dart';
 import 'package:love_db/vector_utils.dart';
 
 class BruteForceCollection extends Collection {
 
   BruteForceCollection({
-    required name,
-    required repository,
-    required dimension,
-    required metric,
+    required String name,
+    required Repository repository,
+    required int dimension,
+    required Metric metric,
   }) : super(name, repository, dimension, metric);
 
   @override
