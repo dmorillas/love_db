@@ -1,0 +1,37 @@
+# Build artifacts
+build/
+
+# IDE files
+.idea/
+*.iml
+
+# Dart/Flutter tools
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-plugins-dev
+.flutter-plugins-dependencies-dev
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Environment and secrets
+.env
+.env.*
+
+# Metadata
+.metadata
+
+# macOS
+.DS_Store
+
+# Platform-specific build outputs
+android/.gradle/
+android/app/build/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# Test files not needed in package
+test/
