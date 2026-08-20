@@ -172,4 +172,42 @@ void main() {
 
     await c.dispose();
   });
+
+  Future<void> findReturnsDistanceFlow({required SearchMode mode, required Metric metric}) async {
+    final love = LoVeDB(dimension: 4, metric: metric, mode: mode);
+    final c = await love.collection('find_distance');
+
+    await c.insert(id: 'doc-a', text: 'a', vector: [1, 0, 0, 0]);
+    await c.insert(id: 'doc-b', text: 'b', vector: [0.8, 0.6, 0, 0]);
+    await c.insert(id: 'doc-c', text: 'c', vector: [0, 0, 1, 0]);
+
+    final results = await c.find(vector: [1, 0, 0, 0], limit: 3);
+
+    expect(results, isNotEmpty);
+    expect(results.every((d) => d.distance != null), isTrue);
+
+    expect(results.first.text, 'a');
+    expect(results.first.distance, metric == Metric.cosine ? closeTo(1.0, 0.01) : closeTo(0.0, 0.01));
+
+    final fetched = await c.get(id: 'doc-a');
+    expect(fetched!.distance, isNull);
+
+    await c.dispose();
+  }
+
+  test('bruteForce + cosine find returns distance', () async {
+    await findReturnsDistanceFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
+  });
+
+  test('bruteForce + euclidean find returns distance', () async {
+    await findReturnsDistanceFlow(mode: SearchMode.bruteForce, metric: Metric.euclidean);
+  });
+
+  test('hnsw + cosine find returns distance', () async {
+    await findReturnsDistanceFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
+  });
+
+  test('hnsw + euclidean find returns distance', () async {
+    await findReturnsDistanceFlow(mode: SearchMode.hnsw, metric: Metric.euclidean);
+  });
 }

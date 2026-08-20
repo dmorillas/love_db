@@ -40,7 +40,13 @@ class BruteForceCollection extends Collection {
       return [];
     }
 
-    return await getDocuments(ids: ids);
+    final documents = await getDocuments(ids: ids);
+    return documents.map((doc) => Document(
+      id: doc.id,
+      text: doc.text,
+      metadata: doc.metadata,
+      distance: results[doc.id],
+    )).toList();
   }
 
   double _cosineSimilarity(List<double> v1, List<double> v2) {

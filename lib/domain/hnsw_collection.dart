@@ -68,13 +68,23 @@ class HnswCollection extends Collection {
       throw ArgumentError('Query vector length (${vector.length}) must equal collection dimension ($dimension).');
     }
     final items = _hnswIndex.search(vector, limit).items;
+    final distances = {
+      for (final item in items)
+        item.item: (metric == Metric.cosine) ? 1.0 - item.distance : item.distance
+    };
     final ids = items.map((e) => e.item).toList();
 
     if (ids.isEmpty) {
       return [];
     }
 
-    return await getDocuments(ids: ids);
+    final documents = await getDocuments(ids: ids);
+    return documents.map((doc) => Document(
+      id: doc.id,
+      text: doc.text,
+      metadata: doc.metadata,
+      distance: distances[doc.id],
+    )).toList();
   }
 
   @override

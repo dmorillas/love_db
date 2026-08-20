@@ -77,7 +77,7 @@ await myCollection.upsert(
 
 ### **5\. Search for Documents**
 
-Search for the most similar documents by providing a query vector.
+Search for the most similar documents by providing a query vector. Each result includes a `distance` field indicating similarity.
 
 ```dart
 final queryVector = [0.9, 0.8, ...];  
@@ -87,9 +87,13 @@ final results = await myCollection.find(
 );
 
 for (final doc in results) {  
-  print('Found document: ${doc.text} with ID ${doc.id}');  
+  print('Found: ${doc.text} (ID: ${doc.id}, distance: ${doc.distance})');  
 }
 ```
+
+The `distance` field is:
+* **Cosine Similarity**: Higher values mean more similar (1.0 = identical)
+* **Euclidean Distance**: Lower values mean more similar (0.0 = identical)
 
 ### **6\. Delete Documents**
 
