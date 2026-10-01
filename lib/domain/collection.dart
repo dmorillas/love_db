@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:love_db/model/document.dart';
 import 'package:love_db/model/metric.dart';
 import 'package:love_db/repository/repository.dart';
@@ -33,6 +35,37 @@ abstract class Collection {
       throw ArgumentError('Vector length (${vector.length}) must equal collection dimension ($dimension).');
     }
     await repository.insert(id: id, vector: VectorUtils.vectorToBytes(vector), text: text, metadata: metadata);
+  }
+
+  Future<void> insertMany({
+    required List<String> ids,
+    required List<String> texts,
+    required List<List<double>> vectors,
+    List<Map<String, dynamic>>? metadatas,
+  }) async {
+    if (ids.isEmpty) {
+      throw ArgumentError('ids must contain at least one document.');
+    }
+    if (ids.length != texts.length) {
+      throw ArgumentError('ids (${ids.length}) and texts (${texts.length}) must have the same length.');
+    }
+    if (ids.length != vectors.length) {
+      throw ArgumentError('ids (${ids.length}) and vectors (${vectors.length}) must have the same length.');
+    }
+    if (metadatas != null && metadatas.length != ids.length) {
+      throw ArgumentError('metadatas (${metadatas.length}) must have the same length as ids (${ids.length}).');
+    }
+
+    final encoded = <Uint8List>[];
+    for (var i = 0; i < vectors.length; i++) {
+      final vector = vectors[i];
+      if (vector.length != dimension) {
+        throw ArgumentError('Vector at index $i has length (${vector.length}) but must equal collection dimension ($dimension).');
+      }
+      encoded.add(VectorUtils.vectorToBytes(vector));
+    }
+
+    await repository.insertMany(ids: ids, vectors: encoded, texts: texts, metadatas: metadatas);
   }
 
   Future<void> upsert({required String id, required List<double> vector, required String text, Map<String, dynamic>? metadata}) async {

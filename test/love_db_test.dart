@@ -210,4 +210,173 @@ void main() {
   test('hnsw + euclidean find returns distance', () async {
     await findReturnsDistanceFlow(mode: SearchMode.hnsw, metric: Metric.euclidean);
   });
+
+  Future<void> insertManyFlow({required SearchMode mode, required Metric metric}) async {
+    final love = LoVeDB(dimension: 4, metric: metric, mode: mode);
+    final c = await love.collection('insert_many');
+
+    await c.insertMany(
+      ids: ['doc-a', 'doc-b', 'doc-c'],
+      texts: ['a', 'b', 'c'],
+      vectors: [
+        [1, 0, 0, 0],
+        [0.9, 0.1, 0, 0],
+        [0, 0, 1, 0],
+      ],
+      metadatas: [
+        {"author": "Ada"},
+        {"author": "Alan"},
+        {"author": "Grace"},
+      ],
+    );
+
+    expect(await c.count(), 3);
+
+    // Every document is persisted and keeps its id / text / metadata pairing.
+    for (final expected in {'doc-a': 'Ada', 'doc-b': 'Alan', 'doc-c': 'Grace'}.entries) {
+      final doc = await c.get(id: expected.key);
+      expect(doc, isNotNull);
+      expect(doc!.text, expected.key.substring(4));
+      expect(doc.metadata['author'], expected.value);
+    }
+
+    // HNSW is approximate, so only the nearest hit is guaranteed at this size.
+    final results = await c.find(vector: [1, 0, 0, 0], limit: 3);
+    expect(results, isNotEmpty);
+    expect(results.first.id, 'doc-a');
+    expect(results.every((d) => ['doc-a', 'doc-b', 'doc-c'].contains(d.id)), isTrue);
+
+    await c.dispose();
+  }
+
+  test('bruteForce + cosine insertMany inserts and searches all documents', () async {
+    await insertManyFlow(mode: SearchMode.bruteForce, metric: Metric.cosine);
+  });
+
+  test('bruteForce + euclidean insertMany inserts and searches all documents', () async {
+    await insertManyFlow(mode: SearchMode.bruteForce, metric: Metric.euclidean);
+  });
+
+  test('hnsw + cosine insertMany inserts and searches all documents', () async {
+    await insertManyFlow(mode: SearchMode.hnsw, metric: Metric.cosine);
+  });
+
+  test('hnsw + euclidean insertMany inserts and searches all documents', () async {
+    await insertManyFlow(mode: SearchMode.hnsw, metric: Metric.euclidean);
+  });
+
+  test('insertMany works without metadata', () async {
+    final love = LoVeDB(dimension: 4, mode: SearchMode.bruteForce);
+    final c = await love.collection('insert_many_no_metadata');
+
+    await c.insertMany(
+      ids: ['doc-a', 'doc-b'],
+      texts: ['a', 'b'],
+      vectors: [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+      ],
+    );
+
+    final a = await c.get(id: 'doc-a');
+    expect(a!.text, 'a');
+    expect(a.metadata, isEmpty);
+
+    await c.dispose();
+  });
+
+  test('insertMany rebuilds the HNSW index on open', () async {
+    final love = LoVeDB(dimension: 4, mode: SearchMode.hnsw);
+    var c = await love.collection('insert_many_rebuild');
+
+    await c.insertMany(
+      ids: ['doc-x', 'doc-y'],
+      texts: ['x', 'y'],
+      vectors: [
+        [0.9, 0, 0, 0],
+        [0, 0.9, 0, 0],
+      ],
+    );
+    await c.dispose();
+
+    c = await love.collection('insert_many_rebuild');
+    final res = await c.find(vector: [1, 0, 0, 0], limit: 1);
+    expect(res.first.text, 'x');
+    expect(await c.count(), 2);
+    await c.dispose();
+  });
+
+  test('insertMany throws when a document id already exists', () async {
+    final love = LoVeDB(dimension: 4, mode: SearchMode.bruteForce);
+    final c = await love.collection('insert_many_conflict');
+
+    await c.insert(id: 'doc-a', text: 'a', vector: [1, 0, 0, 0]);
+
+    expect(
+      () => c.insertMany(
+        ids: ['doc-new', 'doc-a'],
+        texts: ['new', 'duplicate'],
+        vectors: [
+          [0, 0, 1, 0],
+          [0, 1, 0, 0],
+        ],
+      ),
+      throwsA(isA<DatabaseException>()),
+    );
+
+    // The whole batch is rolled back.
+    expect(await c.count(), 1);
+    expect(await c.get(id: 'doc-new'), isNull);
+
+    await c.dispose();
+  });
+
+  test('insertMany validates its inputs', () async {
+    final love = LoVeDB(dimension: 4, mode: SearchMode.bruteForce);
+    final c = await love.collection('insert_many_validation');
+
+    expect(
+      () => c.insertMany(ids: [], texts: [], vectors: []),
+      throwsArgumentError,
+    );
+
+    expect(
+      () => c.insertMany(
+        ids: ['a', 'b'],
+        texts: ['only-one'],
+        vectors: [
+          [1, 0, 0, 0],
+          [0, 1, 0, 0],
+        ],
+      ),
+      throwsArgumentError,
+    );
+
+    expect(
+      () => c.insertMany(
+        ids: ['a'],
+        texts: ['a'],
+        vectors: [
+          [1, 0, 0],
+        ],
+      ),
+      throwsArgumentError,
+    );
+
+    expect(
+      () => c.insertMany(
+        ids: ['a'],
+        texts: ['a'],
+        vectors: [
+          [1, 0, 0, 0],
+        ],
+        metadatas: [{}, {}],
+      ),
+      throwsArgumentError,
+    );
+
+    expect(await c.count(), 0);
+
+    await c.dispose();
+  });
 }

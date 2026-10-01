@@ -10,9 +10,9 @@ class HnswCollection extends Collection {
   late LocalHNSW<String> _hnswIndex;
 
   HnswCollection._internal({
-    required name,
-    required repository,
-    required dimension,
+    required String name,
+    required Repository repository,
+    required int dimension,
     required Metric metric,
   }): super(name, repository, dimension, metric) {
     _hnswIndex = LocalHNSW<String>(
@@ -47,6 +47,19 @@ class HnswCollection extends Collection {
   Future<void> insert({required String id, required List<double> vector, required String text, Map<String, dynamic>? metadata}) async {
     await super.insert(id: id, vector: vector, text: text, metadata: metadata);
     _hnswIndex.add(LocalHnswItem<String>(item: id, vector: vector));
+  }
+
+  @override
+  Future<void> insertMany({
+    required List<String> ids,
+    required List<String> texts,
+    required List<List<double>> vectors,
+    List<Map<String, dynamic>>? metadatas,
+  }) async {
+    await super.insertMany(ids: ids, texts: texts, vectors: vectors, metadatas: metadatas);
+    for (var i = 0; i < ids.length; i++) {
+      _hnswIndex.add(LocalHnswItem<String>(item: ids[i], vector: vectors[i]));
+    }
   }
 
   @override

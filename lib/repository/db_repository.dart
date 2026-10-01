@@ -73,6 +73,25 @@ class DbRepository implements Repository {
   }
 
   @override
+  Future<void> insertMany({required List<String> ids, required List<Uint8List> vectors, required List<String> texts, List<Map<String, dynamic>>? metadatas}) async {
+    final createdAt = DateTime.now().millisecondsSinceEpoch;
+    final batch = _database.batch();
+
+    for (var i = 0; i < ids.length; i++) {
+      batch.insert(_documentsTableName, {
+        "id": ids[i],
+        "text": texts[i],
+        "metadata": jsonEncode(metadatas?[i] ?? <String, dynamic>{}),
+        "created_at": createdAt,
+      });
+
+      batch.insert(_vectorsTableName, {"id": ids[i], "vector": vectors[i]});
+    }
+
+    await batch.commit(noResult: true);
+  }
+
+  @override
   Future<void> upsert({required String id, required Uint8List vector, required String text, Map<String, dynamic>? metadata}) async {
     await _database.transaction((txn) async {
       await txn.insert(_documentsTableName, {

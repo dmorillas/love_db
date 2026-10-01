@@ -75,7 +75,30 @@ await myCollection.upsert(
 );
 ```
 
-### **5\. Search for Documents**
+### **5\. Insert Multiple Documents**
+
+`insertMany` adds a batch of documents in a single transaction, which is much faster than calling `insert` in a loop. It takes parallel lists that must all have the same length, and `metadatas` is optional.
+
+```dart
+await myCollection.insertMany(
+  ids: ["id-1", "id-2", "id-3"],
+  texts: ["First document.", "Second document.", "Third document."],
+  vectors: [
+    [0.1, 0.2, ...], // One vector per document
+    [0.3, 0.4, ...],
+    [0.5, 0.6, ...],
+  ],
+  metadatas: [
+    {"author": "John Doe"},
+    {"author": "Jane Doe"},
+    {"author": "Sam Doe"},
+  ],
+);
+```
+
+The whole batch is atomic: if any id already exists, nothing is inserted. An `ArgumentError` is thrown if the lists have different lengths, if `ids` is empty, or if a vector length does not match the collection dimension.
+
+### **6\. Search for Documents**
 
 Search for the most similar documents by providing a query vector. Each result includes a `distance` field indicating similarity.
 
@@ -95,7 +118,7 @@ The `distance` field is:
 * **Cosine Similarity**: Higher values mean more similar (1.0 = identical)
 * **Euclidean Distance**: Lower values mean more similar (0.0 = identical)
 
-### **6\. Delete Documents**
+### **7\. Delete Documents**
 
 You can delete a document by its ID.
 
@@ -103,7 +126,7 @@ You can delete a document by its ID.
 await myCollection.delete(id: "document-id-123");
 ```
 
-### **7\. Clean Up**
+### **8\. Clean Up**
 
 It's important to dispose of the collection to close the underlying database connection.
 
