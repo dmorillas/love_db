@@ -1,5 +1,9 @@
 # **LoVeDB: Local Vector Database for Flutter 🧡**
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/dmorillas/love_db/refs/heads/main/love_db.png" alt="AI Capo" width="400"/>
+</p>
+
 A simple, fast, and local vector database for your Flutter applications. LoVeDB uses SQLite for persistent storage and offers two powerful search modes: brute-force and HNSW (Hierarchical Navigable Small World) indexing for efficient approximate nearest neighbor (ANN) searches.
 
 ## **✨ Features**
@@ -15,7 +19,7 @@ Add love\_db to your pubspec.yaml file:
 
 ```yaml
 dependencies:
-  love_db: ^1.0.0
+  love_db: ^1.2.0
 ```
 
 Then run `flutter pub get`.
