@@ -1,6 +1,6 @@
 name: love_db
 description: "Local vector database for Flutter apps with on-device SQLite storage, HNSW ANN search, and a simple collections API for managing and querying embeddings."
-version: 1.1.0
+version: 1.2.0
 homepage: https://github.com/dmorillas/love_db
 repository: https://github.com/dmorillas/love_db
 issue_tracker: https://github.com/dmorillas/love_db/issues
